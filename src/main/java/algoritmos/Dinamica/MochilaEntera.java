@@ -5,16 +5,16 @@ import java.util.Arrays;
 public class MochilaEntera {
 
     public static void main(String[] args) {
-        int[] valores = {60, 100, 120};
-        int[] pesos = {10, 20, 30};
-        int maxPeso = 50;
+        int[] valores = {6, 10, 12};
+        int[] pesos = {1, 2, 3};
+        int maxPeso = 5;
 
-        //Prueba con Tabulación
+        System.out.println("Prueba por tabulación: ");
         Objeto maxBeneficioTabulacion = mochilaEnteraTabulacion(valores, pesos, maxPeso);
         System.out.println("Beneficio máximo: " + maxBeneficioTabulacion.beneficio);
         System.out.println("Objetos que tomó: " + maxBeneficioTabulacion.camino);
 
-        //Prueba con Memoización
+        System.out.println("Prueba por Memoizacion: ");
         Objeto maxBeneficioMemoizacion = mochilaEnteraMemoizacion(valores, pesos, maxPeso);
         System.out.println("Beneficio máximo: " + maxBeneficioMemoizacion.beneficio);
         System.out.println("Objetos que tomó: " + maxBeneficioMemoizacion.camino);
@@ -55,7 +55,7 @@ public class MochilaEntera {
             if (maxValor == valorIncluyendo) {
                 resultado = new Objeto(
                         valorIncluyendo,
-                        incluyendo.getCamino() + (n - 1) + " "
+                        incluyendo.getCamino() + n + " "  // Cambio aquí: n en vez de (n-1)
                 );
             } else {
                 resultado = new Objeto(
@@ -100,7 +100,7 @@ public class MochilaEntera {
                     if (maxValor == valorIncluyendo) {
                         dp[i][j] = new Objeto(
                                 valorIncluyendo,
-                                dp[i - 1][j - pesoActual].getCamino() + (i - 1) + " "
+                                dp[i - 1][j - pesoActual].getCamino() + i + " "  // Cambio aquí: i en vez de (i-1)
                         );
                     } else {
                         dp[i][j] = new Objeto(
