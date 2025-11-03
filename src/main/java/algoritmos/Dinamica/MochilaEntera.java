@@ -5,30 +5,114 @@ import java.util.Arrays;
 public class MochilaEntera {
 
     public static void main(String[] args) {
+        int[] valores = {60, 100, 120};
+        int[] pesos = {10, 20, 30};
+        int maxPeso = 50;
 
+        //Prueba con Tabulación
+        Objeto maxBeneficioTabulacion = mochilaEnteraTabulacion(valores, pesos, maxPeso);
+        System.out.println("Beneficio máximo: " + maxBeneficioTabulacion.beneficio);
+        System.out.println("Objetos que tomó: " + maxBeneficioTabulacion.camino);
+
+        //Prueba con Memoización
+        Objeto maxBeneficioMemoizacion = mochilaEnteraMemoizacion(valores, pesos, maxPeso);
+        System.out.println("Beneficio máximo: " + maxBeneficioMemoizacion.beneficio);
+        System.out.println("Objetos que tomó: " + maxBeneficioMemoizacion.camino);
     }
 
-    public static int mochilaEntera(int [] valores, int [] pesos, int maxValue){
-        Objeto [][] dp = new Objeto[valores.length+1][maxValue+1];
+    private static Objeto mochilaEnteraMemoizacion(int[] valores, int[] pesos, int maxPeso) {
+        Objeto[][] memo = new Objeto[valores.length + 1][maxPeso + 1];
 
-        for(int i = 0; i < dp.length; i++){
-            Arrays.fill(dp[i], new Objeto(0, ""));
+        return mochilaRecursiva(valores, pesos, valores.length, maxPeso, memo);
+    }
+
+    private static Objeto mochilaRecursiva(int[] valores, int[] pesos, int n, int capacidad, Objeto[][] memo) {
+        if (n == 0 || capacidad == 0) {
+            return new Objeto(0, "");
         }
 
-        for(int i=1; i<valores.length; i++){
-            for(int j=1; j<maxValue+1; j++){
-                if( j - pesos[i] > 0 ){
-                    dp[i][j] = dp[i-1][j];
-                }else{
-                    int max = Math.max(dp[i-1][j].getBeneficio(), valores[i] + dp[i-1][j - pesos[i]].beneficio);
+        if (memo[n][capacidad] != null) {
+            return memo[n][capacidad];
+        }
+
+        int pesoActual = pesos[n - 1];
+        int valorActual = valores[n - 1];
+
+        Objeto resultado;
+
+        if (pesoActual > capacidad) {
+            resultado = mochilaRecursiva(valores, pesos, n - 1, capacidad, memo);
+        }
+        else {
+            Objeto sinIncluir = mochilaRecursiva(valores, pesos, n - 1, capacidad, memo);
+            int valorSinIncluir = sinIncluir.getBeneficio();
+
+            Objeto incluyendo = mochilaRecursiva(valores, pesos, n - 1, capacidad - pesoActual, memo);
+            int valorIncluyendo = valorActual + incluyendo.getBeneficio();
+
+            int maxValor = Math.max(valorIncluyendo, valorSinIncluir);
+
+            if (maxValor == valorIncluyendo) {
+                resultado = new Objeto(
+                        valorIncluyendo,
+                        incluyendo.getCamino() + (n - 1) + " "
+                );
+            } else {
+                resultado = new Objeto(
+                        valorSinIncluir,
+                        sinIncluir.getCamino()
+                );
+            }
+        }
+
+        memo[n][capacidad] = resultado;
+
+        return resultado;
+    }
+
+    private static Objeto mochilaEnteraTabulacion(int[] valores, int[] pesos, int maxPeso) {
+        Objeto[][] dp = new Objeto[valores.length + 1][maxPeso + 1];
+
+        for (int i = 0; i <= valores.length; i++) {
+            for (int j = 0; j <= maxPeso; j++) {
+                dp[i][j] = new Objeto(0, "");
+            }
+        }
+
+        for (int i = 1; i <= valores.length; i++) {
+            for (int j = 1; j <= maxPeso; j++) {
+                int pesoActual = pesos[i - 1];
+                int valorActual = valores[i - 1];
+
+                if (pesoActual > j) {
+                    dp[i][j] = new Objeto(
+                            dp[i - 1][j].getBeneficio(),
+                            dp[i - 1][j].getCamino()
+                    );
+                }
+                else {
+                    int valorSinIncluir = dp[i - 1][j].getBeneficio();
+
+                    int valorIncluyendo = valorActual + dp[i - 1][j - pesoActual].getBeneficio();
+
+                    int maxValor = Math.max(valorIncluyendo, valorSinIncluir);
+
+                    if (maxValor == valorIncluyendo) {
+                        dp[i][j] = new Objeto(
+                                valorIncluyendo,
+                                dp[i - 1][j - pesoActual].getCamino() + (i - 1) + " "
+                        );
+                    } else {
+                        dp[i][j] = new Objeto(
+                                valorSinIncluir,
+                                dp[i - 1][j].getCamino()
+                        );
+                    }
                 }
             }
-
         }
 
-
-
-        return 0;
+        return dp[valores.length][maxPeso];
     }
 
     static class Objeto{
